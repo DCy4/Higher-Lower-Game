@@ -3,86 +3,66 @@ Higher Lower Game
 David C
 02/01/23
 """
-from art import logo, vs
 from game_data import data
 import random
-import clear
+from art import logo, vs
+from replit import clear
 
+def get_random_account():
+  """Get data from random account"""
+  return random.choice(data)
 
-"""takes an int to either 1: print compare or 2: print against. takes a dictionary index and returns print(f"Compare B: {name}, a {description}, from {country}.) """
-def print_entry(num, dict_entry):
-  instance = ""
-  letter = ""
-  if num == 1:
-    instance = "Compare"
-    letter = "A"
+def format_data(account):
+  """Format account into printable format: name, description and country"""
+  name = account["name"]
+  description = account["description"]
+  country = account["country"]
+  # print(f'{name}: {account["follower_count"]}')
+  return f"{name}, a {description}, from {country}"
+
+def check_answer(guess, a_followers, b_followers):
+  """Checks followers against user's guess 
+  and returns True if they got it right.
+  Or False if they got it wrong.""" 
+  if a_followers > b_followers:
+    return guess == "a"
   else:
-    instance = "Against"
-    letter = "B"
-    
-  name = dict_entry["name"]
-  description = dict_entry["description"]
-  country = dict_entry["country"]
-  
-  print(f"{instance} {letter}: {name}, a {description}, from {country}.")
+    return guess == "b"
 
-"""Takes follower count int and returns str"""
-def compare(A, B):
-  if A > B:
-    return "A"
-  else:
-    return "B"
 
-def print_score():
-  global score
-  if score > 0:
-    print(f"You're right. Current score: {score}")
-  else:
-    return
-    
 def game():
-  global score
-  global game_end
-  while not game_end:  
-    print(logo)
-    print_score()
-    #select random entry from dictionary
-    entry_a = data[random.randrange(len(data))]
-    #select second random entry from dictionary
-    entry_b = data[random.randrange(len(data))]
-    #check for duplicates 
-    while entry_a == entry_b:
-      entry_b = data[random.randrange(len(data))]
-    
-    print_entry(1,entry_a)
-    #print vs image
-    print(vs)
-    print_entry(2,entry_b)
-    
-    #compare follower count
-    fol_a = entry_a["follower_count"]
-    fol_b  = entry_b["follower_count"]
-    answer = ""
-    if fol_a > fol_b:
-      answer = "A"
-    else: 
-      answer = "B"
-    #ask user for answer
-    user_answer = input("Who has more followers? Type 'A' or 'B': ")
-    #compare user answer
-    if user_answer.lower() == answer.lower():
-      score += 1
-      #clear screen
-      return clear()
-    else:
-      game_end = True
-      clear()
-      print(f"Sorry that's wrong. Final score: {score}")
+  print(logo)
+  score = 0
+  game_should_continue = True
+  account_a = get_random_account()
+  account_b = get_random_account()
 
-#flag 
-game_end = False
-score = 0
-#show logo
+  while game_should_continue:
+    account_a = account_b
+    account_b = get_random_account()
+
+    while account_a == account_b:
+      account_b = get_random_account()
+
+    print(f"Compare A: {format_data(account_a)}.")
+    print(vs)
+    print(f"Against B: {format_data(account_b)}.")
+    
+    guess = input("Who has more followers? Type 'A' or 'B': ").lower()
+    a_follower_count = account_a["follower_count"]
+    b_follower_count = account_b["follower_count"]
+    is_correct = check_answer(guess, a_follower_count, b_follower_count)
+
+    clear()
+    print(logo)
+    if is_correct:
+      score += 1
+      print(f"You're right! Current score: {score}.")
+    else:
+      game_should_continue = False
+      print(f"Sorry, that's wrong. Final score: {score}")
+
 game()
+
 
 
